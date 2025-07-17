@@ -1,5 +1,6 @@
-* { font-family: monospace;}
-body { background: #F0F0F0; color: navy; }
+* { font-family: sans; }
+
+body,html { background: #F0F0F0; color: navy; }
 
 header { 
 	color: white; 
@@ -49,37 +50,38 @@ section.post {
 	border-radius: 8px; 
 	box-shadow: 2px 2px 4px #505050 inset;
 	text-align: justify;
+	font-size: 12pt;
 }
 
 section.post p.indent { text-indent: 50px;}
 
-.title {
-	font-size: 10pt;
+section.post .title {
 	font-weight: bold;
 }
 
-.name {
-	font-size: 10pt;
+section.post .name {
 	font-weight: bold;
 }
 
-.datetime { 
+section.post .datetime { 
 	float: right;
-	font-size: 10pt;
 	font-weight: bold;
 }
+
+section.post .content {
+  font-family: monospace;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	text-align: left;
+}
+
 .clear { clear: both;}
 .comments { float: right; }
 hr { border: 1px solid navy; }
 #container {max-width: 800px; margin: 0 auto;}
+
 .button {
 	font-size: 10pt;
 	font-weight: bold;
 }
 
-section.post .content {
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	text-align: left;
-	font-size: 10pt;
-}
