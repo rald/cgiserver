@@ -14,7 +14,7 @@ void ensureDatabase () {
   sqlite3 *db;
   sqlite3_open (DB_PATH, &db);
   sqlite3_exec (db,
-                "CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, message TEXT)",
+                "CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(32), message VARCHAR(1024))",
                 NULL, NULL, NULL);
   sqlite3_close (db);
 }
@@ -47,7 +47,7 @@ int cgiMain () {
   cgiHeaderContentType ("text/html");
   ensureDatabase ();
 
-  char name[100] = "", message[500] = "";
+  char name[33] = "", message[1025] = "";
   cgiFormStringNoNewlines ("name", name, sizeof (name));
   cgiFormStringNoNewlines ("message", message, sizeof (message));
   int page = 1;
@@ -87,9 +87,12 @@ int cgiMain () {
            "<section class='post'>"
            "<form method='POST' action='guestbook.cgi'>"
            "<table width='100%%'>"
-           "<tr><td>Name:</td><td><input style='width:100%%' type='text' name='name' maxlength='32'/></td></tr>"
-           "<tr><td>Message:</td><td><textarea style='width:100%%;height:128px;' name='message' maxlength='1024'></textarea></td></tr>"
-           "<tr><td align='right' colspan='2'><input type='submit' value='Sign'/></form></td></tr>"
+           "<tr><td>Name:</td><td><input style='width:100%%' type='text' name='name' maxlength='32' required /></td></tr>"
+           "<tr><td>Message:</td><td><textarea style='width:100%%;height:128px;resize:none;' name='message' maxlength='1024' required></textarea></td></tr>"
+           "<tr><td align='right' colspan='2'>"
+           "<input type='reset' value='Clear'/>&nbsp;"
+           "<input type='submit' value='Sign'/>"
+           "</form></td></tr>"
            "</table>" "</form>" "</section>");
 
 
@@ -169,7 +172,9 @@ int cgiMain () {
 
   fprintf (cgiOut, "</div>");
 
-  fprintf (cgiOut, "</body></html>");
+  fprintf (cgiOut, "</body>");
+  fprintf (cgiOut, "</html>");
+
 
   sqlite3_close (db);
   return 0;
