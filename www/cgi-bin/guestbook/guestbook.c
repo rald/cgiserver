@@ -132,7 +132,7 @@ int cgiMain () {
     fprintf (cgiOut, "<div class='clear'></div>");
     fprintf (cgiOut, "<div class='name'>%s</div>", name_html);
     fprintf (cgiOut, "<hr>");
-    fprintf (cgiOut, "<p>%s</p>", msg_html);
+    fprintf (cgiOut, "<p class='content'>%s</p>", msg_html);
     fprintf (cgiOut, "</section>");
 
   }
