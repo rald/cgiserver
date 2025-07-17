@@ -98,7 +98,7 @@ int cgiMain() {
     sqlite3_prepare_v2(db, "SELECT name, message,strftime('%Y-%m-%d %l:%M:%S %p',datetime,'+8 hours') as datetime FROM entries ORDER BY id DESC LIMIT ? OFFSET ?", -1, &stmt, 0);
     sqlite3_bind_int(stmt, 1, PAGE_SIZE);
     sqlite3_bind_int(stmt, 2, offset);
-    fprintf(cgiOut, "<h2>Entries (Page %d)</h2>", page);
+    fprintf(cgiOut, "<h2 align='center'>Page %d</h2>", page);
 
     while (sqlite3_step(stmt)==SQLITE_ROW) {
         const unsigned char *name_raw = sqlite3_column_text(stmt, 0);
@@ -121,6 +121,8 @@ int cgiMain() {
     }
     sqlite3_finalize(stmt);
 
+    fprintf(cgiOut,"<center>");
+
     // Pagination links
     int page_count = (total + PAGE_SIZE - 1) / PAGE_SIZE;
     fprintf(cgiOut, "<p>");
@@ -135,6 +137,9 @@ int cgiMain() {
     if (page<page_count)
         fprintf(cgiOut, " <a href='guestbook.cgi?page=%d'>Next&gt;</a>", page+1);
     fprintf(cgiOut, "</p>");
+
+    fprintf(cgiOut,"</center>");
+
 
   	fprintf(cgiOut,"</main>");
 
