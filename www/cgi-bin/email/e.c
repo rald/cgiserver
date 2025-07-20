@@ -33,7 +33,7 @@
 #define SMTP_SAMPLE_NAME_TO     "friend"
 #define SMTP_SAMPLE_MAIL_TO     "thecoconutnutisagiantnut@gmail.com"
 #define SMTP_SAMPLE_LOGIN       "friaelagua@gmail.com"
-#define SMTP_SAMPLE_PASSWORD    "vakb erou mpqj qkah "
+#define SMTP_SAMPLE_PASSWORD    "vakb erou mpqj qkah"
 #define SMTP_SAMPLE_USE_SSL     1
 
 #include <smtp_client.h>
@@ -58,7 +58,7 @@ int main(int argc,char **argv) {
     }
 
     /* To turn on debug output, set those flags */
-    smtp->debugPrint  = 0;
+    smtp->debugPrint  = 1;
     smtp->debugStream = stderr;
 
     /* Initialize letter data */

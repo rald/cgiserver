@@ -1,16 +1,22 @@
 #include "cgic.h"
+#include "smtp.h"
 
-#define SMTP_SAMPLE_HOSTNAME    "smtp.gmail.com"
-#define SMTP_SAMPLE_PORT        465
-#define SMTP_SAMPLE_NAME_FROM   "fria"
-#define SMTP_SAMPLE_MAIL_FROM   "friaelagua@gmail.com"
-#define SMTP_SAMPLE_NAME_TO     "friend"
-#define SMTP_SAMPLE_MAIL_TO     "thecoconutnutisagiantnut@gmail.com"
-#define SMTP_SAMPLE_LOGIN       "friaelagua@gmail.com"
-#define SMTP_SAMPLE_PASSWORD    "vakb erou mpqj qkah "
-#define SMTP_SAMPLE_USE_SSL     1
+#define MAIL_SERVER              "smtp.gmail.com"
+#define MAIL_PORT                "587"
+#define MAIL_CONNECTION_SECURITY SMTP_SECURITY_STARTTLS
+#define MAIL_FLAGS               (SMTP_DEBUG         | \
+                                  SMTP_NO_CERT_VERIFY) /* Do not verify cert. */
+#define MAIL_CAFILE              NULL
+#define MAIL_AUTH                SMTP_AUTH_PLAIN
+#define MAIL_USER                "friaelagua@gmail.com"
+#define MAIL_PASS                "vakb erou mpqj qkah"
+#define MAIL_FROM                "friaelagua@gmail.com"
+#define MAIL_FROM_NAME           "fria"
+#define MAIL_SUBJECT             "greetings"
+#define MAIL_BODY                "hello world"
+#define MAIL_TO                  "thecoconutnutisagiantnut@gmail.com"
+#define MAIL_TO_NAME             "friend"
 
-#include "smtp_client.h"
 
 void cgiInclude(FILE *fout,char *filename) {
 	char line[256];
@@ -49,69 +55,39 @@ int cgiMain() {
 
 		if(strlen(email_body)==0) { fprintf(cgiOut,"email body required.<br>"); return 1; }
 
-    ssize_t ret;
-    SMTP_Client *smtp;
+	  struct smtp *smtp;
+	  int rc;
+	  rc = smtp_open(MAIL_SERVER,
+	                 MAIL_PORT,
+	                 MAIL_CONNECTION_SECURITY,
+	                 MAIL_FLAGS,
+	                 MAIL_CAFILE,
+	                 &smtp);
+	  rc = smtp_auth(smtp,
+	                 MAIL_AUTH,
+	                 MAIL_USER,
+	                 MAIL_PASS);
+	  rc = smtp_address_add(smtp,
+	                        SMTP_ADDRESS_FROM,
+	                        MAIL_FROM,
+	                        MAIL_FROM_NAME);
+	  rc = smtp_address_add(smtp,
+	                        SMTP_ADDRESS_TO,
+	                        email_to,
+	                        MAIL_TO_NAME);
+	  rc = smtp_header_add(smtp,
+	                       "Subject",
+	                       email_subject);
+	  rc = smtp_mail(smtp,
+	                 email_body);
+	  rc = smtp_close(smtp);
 
-    int security = SMTP_NONSECURE;
-    const char *smtpServer     = SMTP_SAMPLE_HOSTNAME;
-    const char *smtpLogin      = SMTP_SAMPLE_LOGIN;
-    const char *smtpPassword   = SMTP_SAMPLE_PASSWORD;
+	  if(rc != SMTP_STATUS_OK) {
+	    fprintf(cgiOut, "smtp failed: %s<br>\n", smtp_status_code_errstr(rc));
+	    return 1;
+	  }
 
-    if(smtp_init(&smtp) < 0) {
-        fprintf(cgiOut, "Can't initialize SMTP!\n");
-        return 1;
-    }
-
-    /* To turn on debug output, set those flags */
-    smtp->debugPrint  = 0;
-    smtp->debugStream = stderr;
-
-    /* Initialize letter data */
-    ret = smtp_createLetter(smtp,
-                            SMTP_TextHTML,
-                            SMTP_SAMPLE_NAME_FROM, SMTP_SAMPLE_MAIL_FROM,
-                            SMTP_SAMPLE_NAME_TO, email_to,
-                            email_subject, email_body);
-
-    if(ret >= 0)
-        ret = smtp_endLetter(smtp);
-
-    if(ret < 0) {
-        fprintf(cgiOut, "prepare FAILED ... [%s]\n", smtp->errorString);
-        smtp_free(&smtp);
-        return 1;
-    }
-    fprintf(cgiOut,"prepare OK ...\n");
-
-    #if SMTP_SAMPLE_USE_SSL
-        security = SMTP_SSL;
-    #endif
-
-    if(smtp_connect(smtp, smtpServer, SMTP_SAMPLE_PORT, security) < 0) {
-        fprintf(cgiOut, "connect FAILED ... [%s]\n", smtp->errorString);
-        smtp_free(&smtp);
-        return 1;
-    }
-
-    fprintf(cgiOut,"connect OK ...\n");
-
-    ret = smtp_login(smtp, smtpLogin, smtpPassword);
-    if(ret < 0) {
-        fprintf(cgiOut, "auth FAILED ... [%s]\r\n", smtp->errorString);
-        smtp_free(&smtp);
-        return 1;
-    }
-    fprintf(cgiOut,"auth OK ...\n");
-
-    ret = smtp_sendLetter(smtp);
-    if(ret < 0) {
-        fprintf(cgiOut, "send FAIL ... [%s]\n", smtp->errorString);
-        smtp_free(&smtp);
-        return 1;
-    }
-    fprintf(cgiOut,"send OK ...\n");
-
-    smtp_free(&smtp);
+	fprintf(cgiOut,"email sent<br>\n");
 
 	}
 
